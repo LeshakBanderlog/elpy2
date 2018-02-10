@@ -49,9 +49,30 @@ def get_bar(col, pos):
     return percent
 
 
+def get_target():
+
+    pos = TARGET_BAR_POS
+    col = TARGET_BAR_COL
+    filled_pixels = 0
+
+    img = get_screen(pos[0], pos[1], pos[2], pos[3])
+
+    pixels = img[0].tolist()
+    for pixel in pixels:
+        if pixel == col:
+            filled_pixels += 1
+
+    if filled_pixels > 0:
+        return True
+    return False
+
+
 def get_target_hp():
 
-    percent = get_bar(TARGET_HP_COL, TARGET_HP_POS)
+    if get_target():
+        percent = get_bar(TARGET_HP_COL, TARGET_HP_POS)
+    else:
+        percent = -1
     return percent
 
 
@@ -71,7 +92,7 @@ def get_buff():
 
     pos = BUFF_POS
     col = BUFF_COL
-    filled_pixels = 1
+    filled_pixels = 0
 
     img = get_screen(pos[0], pos[1], pos[2], pos[3])
 

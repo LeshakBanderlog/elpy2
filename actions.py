@@ -29,7 +29,7 @@ def turn():
     method = TURN
     if method == 'key':
         keyDown('right')
-        time.sleep(1.7)
+        time.sleep(1)
         keyUp('right')
     else:
         moveTo(GAME_WINDOW_POS[2] / 2 + 50, GAME_WINDOW_POS[3] / 2 + 150)
@@ -59,8 +59,8 @@ def set_target():
         moveTo(center, left[1] + 30, 0.3)
         if find_from_targeted():
                 click()
-                if get_target_hp() > 0:
-                    return True
+                return True
+
         return False
 
 
@@ -91,8 +91,7 @@ def find_from_targeted():
 
 def cancel_target():
 
-    moveTo(585, 12, 0.2)
-    click()
+    press('esc')
 
 
 def loot():
@@ -102,6 +101,7 @@ def loot():
         press(KEY_PICK)
         time.sleep(0.2)
         picks -= 1
+    cancel_target()
 
 
 def rest(kills):
