@@ -18,6 +18,7 @@ def reset_camera():
 
 def unstuck():
 
+    cancel_target()
     moveTo(GAME_WINDOW_POS[2] - 250, GAME_WINDOW_POS[3])
     click()
     time.sleep(1)
@@ -36,6 +37,7 @@ def turn():
         click()
         time.sleep(0.5)
         press('end')
+        time.sleep(0.5)
 
 
 def set_target():
@@ -56,12 +58,14 @@ def set_target():
         center = round((right[0] + left[0]) / 2)
         center = int(center)
 
-        moveTo(center, left[1] + 30, 0.3)
+        moveTo(center, left[1] + 40, 0.2)
         if find_from_targeted():
                 click()
-                return True
+                time.sleep(0.3)
+                if get_target_hp() > 0:
+                    return True
 
-        return False
+    return False
 
 
 def find_from_targeted():
@@ -108,14 +112,14 @@ def rest(kills):
 
     global resting
     if not resting and get_self_mp() < 20:
-        print('Time to rest! ' + kills + ' mobs killed per mana pool.')
+        print('Time to rest! ' + str(kills) + ' mobs killed.')
         resting = True
         press(KEY_SIT)
-        past_hp = 100
+        past_hp = 0
         while get_self_mp() < 100:
             time.sleep(5)
             current_hp = get_self_hp()
-            if past_hp < current_hp:
+            if past_hp > current_hp:
                 press(KEY_NEXT_TARGET)
                 resting = False
                 break
@@ -127,9 +131,10 @@ def rest(kills):
 def buff(kills):
 
     if not get_buff():
-        print('Time to buff! ' + kills + ' mobs killed per buff.')
+        print('Time to buff! ' + str(kills) + ' mobs killed.')
         press(KEY_BUFF)
         time.sleep(BUFF_TIME)
+        cancel_target()
 
 
 # usability wrappers

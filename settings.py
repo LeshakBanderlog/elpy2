@@ -2,8 +2,8 @@
 # LOGIC
 NAME = 'over'       # over/summoner
 WINDOW = 'none'     # over/summoner/none
-PICKS = 5           # Amount of trys to pick the drop
-TURN = 'key'      # key/click
+PICKS = 7           # Amount of trys to pick the drop
+TURN = 'click'      # key/click
 ACP = False         # ACP is on?
 POTS_CD = 10        # Potions cd setup for ACP
 BUFF_TIME = 5       # Time needed to perform buff

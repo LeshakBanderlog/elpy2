@@ -10,4 +10,4 @@ while i > 0:
     time.sleep(1)
     i -= 1
 
-print(get_target_hp())
+print(set_target())
