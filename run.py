@@ -543,7 +543,6 @@ def assist_mode(name):
 
 
 # START
-time.sleep(3)
 
 if __name__ == '__main__':
 

@@ -4,7 +4,7 @@ NAME = 'over'        # over/summoner
 WINDOW = 'summoner'  # over/summoner/none
 ASSIST = False       # Assist mode toggle
 ACP = False
-PICKS = 7            # Amount of picks drop
+PICKS = 10           # Amount of picks drop
 TURN = 'key'         # key/click
 BUFF_TIME = 5        # Time needed to perform buff
 
