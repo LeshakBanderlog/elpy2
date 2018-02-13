@@ -1,21 +1,13 @@
 from run import *
+import os
 
+def file_checker():
 
-if __name__ == '__main__':
-
-    a = Process(target=acp)
-    w = Process(target=window)
-    if acp_on:
-        a.start()
-    if mode != '':
-        w.start()
-
-    time.sleep(3)
-    print('start')
-
-    if acp_on:
-        a.join()
-    if mode != '':
-        w.join()
-
-    print('stop')
+    num = 1
+    while True:
+        file = 'img/target_' + num + '.bmp'
+        if os.path.exists(file):
+            num += 1
+        else:
+            break
+    return num
