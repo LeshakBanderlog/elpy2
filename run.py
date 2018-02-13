@@ -1,12 +1,13 @@
 from pyautogui import keyDown, keyUp, moveTo, position, press
+from PIL import ImageGrab, Image, ImageChops
 from multiprocessing import Process, Event
 from autoit import mouse_click as click
-from PIL import ImageGrab
 from settings import *
 import numpy as np
 import logging
-import cv2
 import time
+import cv2
+import os
 
 
 # VAR ------------------------------
@@ -133,16 +134,34 @@ def get_buff():
     return False
 
 
+# noinspection PyTypeChecker
 def is_target_in_list():
 
     pos = TARGET_NAME_POS
-    img = get_screen(pos[0], pos[1], pos[2], pos[3])
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = ImageGrab.grab(bbox=(pos[0], pos[1], pos[2], pos[3]))
+    ok = False
+    num = 1
 
-    for line in gray:
-        for pix in gray[line]:
-            ...
+    while True:
+        file = 'img/target_' + str(num) + '.png'
+        if os.path.exists(file):
+            img2 = Image.open(file)
+            dif = ImageChops.difference(img, img2)
+            pic = np.array(dif)
+            gray = cv2.cvtColor(pic, cv2.COLOR_BGR2GRAY)
+            pixels = 0
+            for line in range(len(gray)):
+                for pix in range(len(gray[line])):
+                    if gray[line][pix] > 100:
+                        pixels += 1
+            if pixels == 0:
+                ok = True
+                break
+            num += 1
+        else:
+            break
 
+    return ok
 
 
 # ACTIONS --------------------------
@@ -202,7 +221,12 @@ def set_target():
         if find_from_targeted():
                 click()
                 time.sleep(0.5)
-                if get_target_hp() > 0:
+                if TARGET_LIST:
+                    if is_target_in_list() and get_target_hp() > 0:
+                        return True
+                    else:
+                        press('esc')
+                elif get_target_hp() > 0:
                     return True
 
     return False
@@ -421,6 +445,7 @@ def stand_alone_mode(name):
 
     kills = 0
     useless = 0
+    flame = False
     logging.info('stand_alone mode')
 
     if name == 'over':
@@ -437,7 +462,9 @@ def stand_alone_mode(name):
                         use_vamp()
                         use_attack()
                     else:
-                        # use_main_nuke()
+                        if not flame:
+                            use_main_nuke()
+                            flame = True
                         use_attack()
                 else:
                     use_attack()
@@ -451,16 +478,19 @@ def stand_alone_mode(name):
                     buff(kills)
                     if get_self_hp() < 50:
                         use_second_nuke()
-                        time.sleep(5)
+                        time.sleep(7)
             elif set_target():
                 useless = 0
+                flame = False
                 if target_hp == 100:
                     useless += 1
                     if get_self_hp() < 80:
                         use_vamp()
                         use_attack()
                     else:
-                        # use_main_nuke()
+                        if not flame:
+                            use_main_nuke()
+                            flame = True
                         use_attack()
                 else:
                     use_attack()
