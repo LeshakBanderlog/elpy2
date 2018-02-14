@@ -1,10 +1,11 @@
 # Some sort of config file
 # LOGIC
 NAME = 'over'        # over/summoner
-WINDOW = 'summoner'  # over/summoner/none
+WINDOW = 'none'      # over/summoner/none
 ASSIST = False       # Assist mode toggle
-ACP = False
-PICKS = 7            # Amount of picks drop
+ACP = True
+TARGET_LIST = True
+PICKS = 10           # Amount of picks drop
 TURN = 'key'         # key/click
 BUFF_TIME = 5        # Time needed to perform buff
 
@@ -40,6 +41,7 @@ WIN_KEY_POTS = 'num6'
 
 # TELEMETRY
 GAME_WINDOW_POS = (0, 0, 1024, 600)
+TARGET_NAME_POS = (438, 1, 578, 25)
 TARGET_BAR_POS = (431, 26, 591, 27)
 TARGET_BAR_COL = [16, 25, 52]
 TARGET_EMPTY_HP_COL = [90, 36, 49]

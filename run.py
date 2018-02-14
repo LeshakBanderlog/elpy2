@@ -1,11 +1,13 @@
 from pyautogui import keyDown, keyUp, moveTo, position, press
+from PIL import ImageGrab, Image, ImageChops
+from multiprocessing import Process, Event
 from autoit import mouse_click as click
-from multiprocessing import Process
-from PIL import ImageGrab
 from settings import *
 import numpy as np
-import cv2
+import logging
 import time
+import cv2
+import os
 
 
 # VAR ------------------------------
@@ -13,7 +15,6 @@ import time
 mode = WINDOW
 acp_on = ACP
 resting = False
-win_resting = False
 win_follow = False
 
 
@@ -133,6 +134,36 @@ def get_buff():
     return False
 
 
+# noinspection PyTypeChecker
+def is_target_in_list():
+
+    pos = TARGET_NAME_POS
+    img = ImageGrab.grab(bbox=(pos[0], pos[1], pos[2], pos[3]))
+    ok = False
+    num = 1
+
+    while True:
+        file = 'img/target_' + str(num) + '.png'
+        if os.path.exists(file):
+            img2 = Image.open(file)
+            dif = ImageChops.difference(img, img2)
+            pic = np.array(dif)
+            gray = cv2.cvtColor(pic, cv2.COLOR_BGR2GRAY)
+            pixels = 0
+            for line in range(len(gray)):
+                for pix in range(len(gray[line])):
+                    if gray[line][pix] > 100:
+                        pixels += 1
+            if pixels == 0:
+                ok = True
+                break
+            num += 1
+        else:
+            break
+
+    return ok
+
+
 # ACTIONS --------------------------
 
 def reset_camera():
@@ -158,7 +189,7 @@ def turn():
     method = TURN
     if method == 'key':
         keyDown('right')
-        time.sleep(0.7)
+        time.sleep(1)
         keyUp('right')
     else:
         moveTo(GAME_WINDOW_POS[2] / 2 - 50, GAME_WINDOW_POS[3] / 2 + 170)
@@ -190,7 +221,12 @@ def set_target():
         if find_from_targeted():
                 click()
                 time.sleep(0.5)
-                if get_target_hp() > 0:
+                if TARGET_LIST:
+                    if is_target_in_list() and get_target_hp() > 0:
+                        return True
+                    else:
+                        press('esc')
+                elif get_target_hp() > 0:
                     return True
 
     return False
@@ -240,7 +276,7 @@ def rest(kills):
 
     global resting
     if not resting and get_self_mp() < 20:
-        print('Time to rest! ' + str(kills) + ' mobs killed.')
+        logging.info('Time to rest! ' + str(kills) + ' mobs killed.')
         resting = True
         press(KEY_SIT)
         past_hp = 0
@@ -260,7 +296,7 @@ def buff(kills):
 
     time.sleep(1)
     if not get_buff():
-        print('Time to buff! ' + str(kills) + ' mobs killed.')
+        logging.info('Time to buff! ' + str(kills) + ' mobs killed.')
         press(KEY_BUFF)
         time.sleep(BUFF_TIME)
         cancel_target()
@@ -337,7 +373,7 @@ def use_win_second_nuke():
 def use_win_assist():
     global win_follow
     win_follow = False
-    # print('assist')
+    logging.info('WIN assist')
     press(WIN_KEY_ASSIST)
     time.sleep(0.2)
 
@@ -346,7 +382,7 @@ def use_win_follow():
     global win_follow
     if not win_follow:
         time.sleep(0.2)
-        # print('follow')
+        logging.info('WIN follow')
         press(WIN_KEY_FOLLOW)
         win_follow = True
 
@@ -363,14 +399,12 @@ def use_win_pots():
 
 # ADDS -----------------------------
 
-def window():
+def window(flag):
 
     if mode == 'summoner':
-        print('window ON')
-        global resting
-        global win_resting
+        logging.info('WINDOW ------- ON')
         use_win_follow()
-        while position()[0] < STOP[0] and position()[1] < STOP[1]:
+        while not flag.is_set():
 
             time.sleep(0.2)
 
@@ -379,43 +413,30 @@ def window():
                 if 100 > target_hp > 20:
                     use_win_assist()
                     if get_win_hp() < 80:
-                        # print(str(target_hp) + ' and win hp < 80 -> VAMP'
                         use_win_vamp()
-                    # print(str(target_hp) + ' -> NUKE')
                     use_win_nuke()
             elif target_hp == 0:
-                # print('target is dead')
                 use_win_follow()
-            elif resting:
-                if not win_resting:
-                    use_win_follow()
-                    time.sleep(3)
-                    use_win_sit()
-                elif win_resting:
-                    use_win_sit()
-                    time.sleep(1)
-                else:
-                    use_win_follow()
             else:
                 use_win_follow()
 
             if get_win_hp() < 40:
                 use_win_pots()
 
-        print('window OFF')
+        logging.info('WINDOW ------- OFF')
 
     elif mode == 'over':
         ...
 
 
-def acp():
+def acp(flag):
 
-    print('acp ON')
-    while position()[0] < STOP[0] and position()[1] < STOP[1]:
+    logging.info('ACP ---------- ON')
+    while not flag.is_set():
             if get_self_hp() < 40:
                 press(KEY_POTS)
             time.sleep(0.5)
-    print('acp OFF')
+    logging.info('ACP ---------- OFF')
 
 
 # MAIN LOGIC
@@ -424,9 +445,12 @@ def stand_alone_mode(name):
 
     kills = 0
     useless = 0
+    flame = False
+    logging.info('stand_alone mode')
 
     if name == 'over':
-        while position()[0] < STOP[0] and position()[1] < STOP[1]:
+        logging.info('enabled OVERLORD logic')
+        while position()[0] < STOP[0] and position()[1] < STOP[1] or get_self_hp() == 0:
 
             time.sleep(0.1)
             target_hp = get_target_hp()
@@ -438,7 +462,9 @@ def stand_alone_mode(name):
                         use_vamp()
                         use_attack()
                     else:
-                        # use_main_nuke()
+                        if not flame:
+                            use_main_nuke()
+                            flame = True
                         use_attack()
                 else:
                     use_attack()
@@ -452,28 +478,33 @@ def stand_alone_mode(name):
                     buff(kills)
                     if get_self_hp() < 50:
                         use_second_nuke()
-                        time.sleep(5)
+                        time.sleep(7)
             elif set_target():
                 useless = 0
+                flame = False
                 if target_hp == 100:
                     useless += 1
                     if get_self_hp() < 80:
                         use_vamp()
                         use_attack()
                     else:
-                        # use_main_nuke()
+                        if not flame:
+                            use_main_nuke()
+                            flame = True
                         use_attack()
                 else:
                     use_attack()
             else:
                 turn()
 
-            if useless > 100:
+            if useless > 80:
+                logging.info('Looks loki im stuck... Go somewhere.')
                 useless = 0
                 unstuck()
 
     if name == 'summoner':
-        while position()[0] < STOP[0] and position()[1] < STOP[1]:
+        logging.info('enabled SUMMONER logic')
+        while position()[0] < STOP[0] and position()[1] < STOP[1] or get_self_hp() == 0:
 
             time.sleep(0.1)
             target_hp = get_target_hp()
@@ -511,7 +542,8 @@ def stand_alone_mode(name):
             else:
                 turn()
 
-            if useless > 40:
+            if useless > 80:
+                logging.info('Looks loki im stuck... Go somewhere.')
                 useless = 0
                 unstuck()
 
@@ -519,9 +551,11 @@ def stand_alone_mode(name):
 def assist_mode(name):
 
     kills = 0
+    logging.info('assist mode')
 
     if name == 'over':
-        while position()[0] < STOP[0] and position()[1] < STOP[1]:
+        logging.info('enabled OVERLORD logic')
+        while position()[0] < STOP[0] and position()[1] < STOP[1] or get_self_hp() == 0:
 
             time.sleep(0.1)
             target_hp = get_target_hp()
@@ -534,7 +568,7 @@ def assist_mode(name):
                 kills += 1
                 loot()
                 use_follow()
-                print('%s mobs killed.', kills)
+                logging.info('%s mobs killed.', kills)
             else:
                 use_assist()
 
@@ -543,28 +577,34 @@ def assist_mode(name):
 
 
 # START
-time.sleep(3)
+
+logging.basicConfig(filename='log.txt', format='%(asctime)s %(levelname)s:  %(message)s', level=logging.INFO)
 
 if __name__ == '__main__':
 
-    a = Process(target=acp)
-    w = Process(target=window)
+    e = Event()
+    a = Process(target=acp, args=(e,))
+    w = Process(target=window, args=(e,))
     if acp_on:
         a.start()
     if mode != '':
         w.start()
 
     time.sleep(3)
-    print('start')
+    logging.info('MAIN LOGIC --- ON')
 
     if ASSIST:
         assist_mode(NAME)
     else:
         stand_alone_mode(NAME)
 
+    if get_self_hp() == 0:
+        logging.info('Im dead :(')
+
+    e.set()
     if acp_on:
         a.join()
     if mode != '':
         w.join()
 
-    print('stop')
+    logging.info('MAIN LOGIC --- OFF')

@@ -1,5 +1,4 @@
 from run import *
 
 
-while True:
-    turn()
+print(is_target_in_list())
