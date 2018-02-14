@@ -189,7 +189,7 @@ def turn():
     method = TURN
     if method == 'key':
         keyDown('right')
-        time.sleep(0.7)
+        time.sleep(1)
         keyUp('right')
     else:
         moveTo(GAME_WINDOW_POS[2] / 2 - 50, GAME_WINDOW_POS[3] / 2 + 170)
@@ -267,7 +267,7 @@ def loot():
     picks = PICKS
     while picks > 0:
         press(KEY_PICK)
-        time.sleep(0.3)
+        time.sleep(0.2)
         picks -= 1
     cancel_target()
 
@@ -578,7 +578,7 @@ def assist_mode(name):
 
 # START
 
-logging.basicConfig(format='%(asctime)s %(levelname)s:  %(message)s', level=logging.INFO)
+logging.basicConfig(filename='log.txt', format='%(asctime)s %(levelname)s:  %(message)s', level=logging.INFO)
 
 if __name__ == '__main__':
 
@@ -597,6 +597,9 @@ if __name__ == '__main__':
         assist_mode(NAME)
     else:
         stand_alone_mode(NAME)
+
+    if get_self_hp() == 0:
+        logging.info('Im dead :(')
 
     e.set()
     if acp_on:
