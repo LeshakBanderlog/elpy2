@@ -1,4 +1,4 @@
-from run import *
+import run
 
-
-print(is_target_in_list())
+run.skills = run.get_list(run.SKILL_FILE)
+print(run.is_ready('1'))
