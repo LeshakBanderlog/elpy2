@@ -4,7 +4,7 @@ from run import *
 # Target List Generator ^^
 
 def get_file_number():
-    num = 1
+    num = 0
     while True:
         file = 'img/target_' + str(num) + '.png'
         if os.path.exists(file):

@@ -1,20 +1,25 @@
 # Some sort of config file
 # LOGIC
-NAME = 'over'        # over/summoner
-WINDOW = 'none'      # over/summoner/none
+WINDOW = True
 ASSIST = False       # Assist mode toggle
 ACP = True
 TARGET_LIST = True
 PICKS = 10           # Amount of picks drop
 TURN = 'key'         # key/click
-BUFF_TIME = 5        # Time needed to perform buff
+BUFF_TIME = 15        # Time needed to perform buff
 
 STOP = (1500, 768)
+IDLE = 3600
+
+# IMG
+TARGET_FILE = 'target'
+SKILL_FILE = 'skill'
 
 # KEYBINDINGS
 KEY_MAIN_SKILL = 'f3'
 KEY_SECOND_SKILL = 'f1'
 KEY_VAMP_SKILL = 'f2'
+KEY_HEAL = 'f1'
 KEY_BUFF = 'f12'
 
 KEY_ATTACK = 'f4'
@@ -48,6 +53,7 @@ TARGET_EMPTY_HP_COL = [90, 36, 49]
 TARGET_HP_COL = [214, 24, 65]
 SELF_HP_POS = (16, 41, 165, 42)
 SELF_HP_COL = [214, 8, 49]
+SELF_HP_CRITICAL_COL = [231, 48, 82]
 SELF_MP_POS = (16, 55, 165, 56)
 SELF_MP_COL = [0, 113, 206]
 WIN_HP_POS = (16, 180, 165, 181)
@@ -56,3 +62,4 @@ WIN_MP_POS = (16, 187, 165, 188)
 WIN_MP_COL = [7, 103, 200]
 BUFF_POS = (177, 4, 178, 5)
 BUFF_COL = [16, 25, 52]
+SKILL_POS = [380, 728, 414, 762]
