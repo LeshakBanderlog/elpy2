@@ -411,7 +411,7 @@ def use_win_attack():
 def use_win_nuke():
     time.sleep(0.2)
     press(WIN_KEY_MAIN_SKILL)
-    time.sleep(3)
+    time.sleep(1)
 
 
 def use_win_vamp():
@@ -516,16 +516,18 @@ def stand_alone_mode():
         if target_hp > 0:
             if target_hp == 100:
                 useless += 1
-                if get_self_hp() < 80:
+                if get_self_hp() < 80 and get_self_mp() > 15:
                     use_vamp()
                     use_attack()
+                else:
+                    use_attack()
+            elif target_hp > 30:
+                if get_self_hp() < 60 and get_self_mp() > 15:
+                    use_vamp()
                 else:
                     use_attack()
             else:
-                if get_self_hp() < 60:
-                    use_vamp()
-                else:
-                    use_attack()
+                use_attack()
         elif target_hp == 0:
             kills += 1
             use_next_target()
@@ -547,6 +549,7 @@ def stand_alone_mode():
             turn()
 
         if useless > 100:
+            useless = 0
             unstuck()
 
     logging.info('FINISHING -> HP ' + str(get_self_hp()) + '%. ' + str(kills) + ' mobs killed this session.')
