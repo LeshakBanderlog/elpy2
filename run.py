@@ -184,12 +184,16 @@ def is_ready(pos):
     pos3 = SKILL_POS[3]
     img = ImageGrab.grab(bbox=(pos0, pos1, pos2, pos3))
 
+    # c = 0
     for skill in skills:
         img2 = skill
+        # img2.save('img/listed_' + str(c) + '.png')
         dif = ImageChops.difference(img, img2)
         # noinspection PyTypeChecker
         pic = np.array(dif)
         gray = cv2.cvtColor(pic, cv2.COLOR_BGR2GRAY)
+        # cv2.imwrite('img/def_' + str(c) + '.png', gray)
+        # c += 1
         pixels = 0
         for line in range(len(gray)):
             for pix in range(len(gray[line])):
@@ -259,7 +263,7 @@ def set_target():
         moveTo(center, left[1] + 30, 0.2)
         if find_from_targeted():
                 click()
-                time.sleep(0.5)
+                time.sleep(0.2)
                 if TARGET_LIST:
                     if is_listed() and get_target_hp() > 0:
                         logging.info('TARGET SET')
@@ -317,7 +321,7 @@ def loot():
 def rest(kills):
 
     global resting
-    if not resting and get_self_mp() < 20:
+    if not resting and get_self_mp() < 25:
         logging.info('REST -> ' + str(kills) + ' mobs killed.')
         resting = True
         press(KEY_SIT)
@@ -332,6 +336,7 @@ def rest(kills):
             past_hp = current_hp
         if resting:
             press(KEY_SIT)
+    resting = False
 
 
 def buff(kills):
@@ -341,6 +346,7 @@ def buff(kills):
         logging.info('BUFF -> ' + str(kills) + ' mobs killed.')
         press(KEY_BUFF)
         time.sleep(BUFF_TIME)
+        cancel_target()
 
 
 # USABILITY WRAPPERS ---------------
@@ -516,16 +522,24 @@ def stand_alone_mode():
         if target_hp > 0:
             if target_hp == 100:
                 useless += 1
-                if get_self_hp() < 80 and get_self_mp() > 15:
+                if get_self_hp() < 80 and get_self_mp() > 20:
                     use_vamp()
+                    use_attack()
+                elif get_self_mp() > 30:
+                    use_main_nuke()
                     use_attack()
                 else:
                     use_attack()
-            elif target_hp > 30:
-                if get_self_hp() < 60 and get_self_mp() > 15:
-                    use_vamp()
-                else:
-                    use_attack()
+            # elif target_hp < 30:
+                # if get_self_hp() < 60 and get_self_mp() > 15:
+                #     use_vamp()
+                # if get_self_mp() > 15:
+                    # use_second_nuke()
+                # else:
+                    # use_attack()
+            elif get_self_hp() < 60 and get_self_mp() > 20:
+                use_vamp()
+                use_attack()
             else:
                 use_attack()
         elif target_hp == 0:
@@ -537,10 +551,10 @@ def stand_alone_mode():
                 loot()
                 rest(kills)
                 buff(kills)
-                if get_win_hp() < 50:
-                    logging.info('HEAL')
-                    use_heal()
-                    time.sleep(7)
+                # if get_win_hp() < 50:
+                #     logging.info('HEAL')
+                #     use_heal()
+                #     time.sleep(7)
             else:
                 logging.info('NEXT TARGET ->')
         elif set_target():
@@ -578,7 +592,7 @@ def assist_mode():
             use_assist()
 
 
-# logging.basicConfig(filename='log.txt', format='%(asctime)s %(levelname)s:  %(message)s', level=logging.DEBUG)
+# logging.basicConfig(filename='log.txt', format='%(asctime)s %(levelname)s:  %(message)s', level=logging.INFO)
 logging.basicConfig(format='%(asctime)s %(levelname)s:  %(message)s', level=logging.INFO)
 
 if __name__ == '__main__':
@@ -591,7 +605,7 @@ if __name__ == '__main__':
 
     if acp_on:
         a.start()
-    if mode != '':
+    if mode:
         w.start()
 
     time.sleep(3)
@@ -606,7 +620,7 @@ if __name__ == '__main__':
     if acp_on:
         a.join()
         logging.info('ACP ---------- OFF')
-    if mode != '':
+    if mode:
         w.join()
         logging.info('WINDOW ------- OFF')
 

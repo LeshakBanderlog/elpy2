@@ -1,6 +1,6 @@
 # Some sort of config file
 # LOGIC
-WINDOW = True
+WINDOW = False
 ASSIST = False       # Assist mode toggle
 ACP = True
 TARGET_LIST = True
@@ -9,7 +9,7 @@ TURN = 'key'         # key/click
 BUFF_TIME = 15        # Time needed to perform buff
 
 STOP = (1500, 768)
-IDLE = 3600
+IDLE = 120
 
 # IMG
 TARGET_FILE = 'target'
